@@ -10,6 +10,8 @@ import * as proxyMiddleware from 'proxy-middleware';
 import { injectDiagnosticsHtml } from '../logger/logger-diagnostics';
 import { getProjectJson, IonicProject } from '../util/ionic-project';
 
+import { LabAppView, ApiCordovaProject } from './lab';
+
 
 /**
  * Create HTTP server
@@ -25,8 +27,12 @@ export function createHttpServer(config: ServeConfig): express.Application {
   app.get('/', serveIndex);
   app.use('/', express.static(config.wwwDir));
   app.use(`/${LOGGER_DIR}`, express.static(path.join(__dirname, '..', '..', 'bin'), { maxAge: 31536000 }));
+
+  // Lab routes
   app.use(IONIC_LAB_URL + '/static', express.static(path.join(__dirname, '..', '..', 'lab', 'static')));
-  app.get(IONIC_LAB_URL, (req, res) => res.sendFile('index.html', {root: path.join(__dirname, '..', '..', 'lab')}));
+  app.get(IONIC_LAB_URL, LabAppView);
+  app.get(IONIC_LAB_URL + '/api/v1/cordova', ApiCordovaProject );
+  
   app.get('/cordova.js', serveCordovaJS);
 
   if (config.useProxy) {
